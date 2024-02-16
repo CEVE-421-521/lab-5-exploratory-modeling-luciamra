@@ -63,19 +63,39 @@ using HouseElevation
 
 ## House
 
-This creates the House object which contains all fo the relevant information four our building, including: depth-damage function, area, cost (USD), elevation relative to gauge, and metadata
+This creates the House object which contains all of the relevant information four our building, including: depth-damage function, area, cost (USD), elevation relative to gauge, and metadata
+The building I am studying is Fisherman's Wharf at 2200 Harborside Drive Galveston, TX.
+I got the information for the building area from the cvent website for event space. The value of the property results fro searches on Zillow for average building prices in the area. Finally, the depth-damage curve which I chose is a result of location, building type, and what I am looking to analyze for damages. 
 ```{julia}
 house = let
     haz_fl_dept = CSV.read("data/haz_fl_dept.csv", DataFrame) # read in the file
     desc = "Cafeteria Restaurant, structure"
     row = @rsubset(haz_fl_dept, :Description == desc)[1, :] # select the row I want
     area = 4004u"ft^2"
-    height_above_gauge = 3.74u"ft"
+    height_above_gauge = 4u"ft" # height is actually 3.74ft but this function only takes integer values so we will round to 4
     House(
         row;
         area=area,
         height_above_gauge=height_above_gauge,
         value_usd=400_000,
+    )
+end
+```
+
+We can use this House object to find a relationship between flood depth and home damage. 
+```{julia}
+let
+    depths = uconvert.(u"ft", (-7.0u"ft"):(1.0u"inch"):(30.0u"ft"))
+    damages = house.ddf.(depths) .* house.value_usd ./ 1000
+    scatter(
+        depths,
+        damages;
+        xlabel="Flood Depth",
+        ylabel="Damage (Thousand USD)",
+        label="$(house.description)\n($(house.source))",
+        legend=:bottomright,
+        size=(800, 400),
+        yformatter=:plain, # prevents scientific notation
     )
 end
 ```
