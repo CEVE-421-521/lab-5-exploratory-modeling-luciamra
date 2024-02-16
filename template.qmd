@@ -1,6 +1,6 @@
 ---
 title: "Lab 5: Sea-Level Rise"
-author: "<Your Name (NetID)>"
+author: "Lucia Romero-Alston (lmr12)"
 jupyter: julia-1.10
 date: 2024-02-16
 
@@ -59,4 +59,65 @@ Plots.default(; margin=5Plots.mm)
 ```{julia}
 using Revise
 using HouseElevation
+```
+
+## House
+
+This creates the House object which contains all fo the relevant information four our building, including: depth-damage function, area, cost (USD), elevation relative to gauge, and metadata
+```{julia}
+house = let
+    haz_fl_dept = CSV.read("data/haz_fl_dept.csv", DataFrame) # read in the file
+    desc = "Cafeteria Restaurant, structure"
+    row = @rsubset(haz_fl_dept, :Description == desc)[1, :] # select the row I want
+    area = 4004u"ft^2"
+    height_above_gauge = 3.74u"ft"
+    House(
+        row;
+        area=area,
+        height_above_gauge=height_above_gauge,
+        value_usd=400_000,
+    )
+end
+```
+
+## Sea-level Rise
+
+Here we will model sea-level rise using the approach by Otto et al. (2017) that is calibrated to hisotrical sea-level rise in the Netherlands.
+```{julia}
+slr_scenarios = let
+    df = CSV.read("data/slr_oddo.csv", DataFrame)
+    [Oddo17SLR(a, b, c, tstar, cstar) for (a, b, c, tstar, cstar) in eachrow(df)]
+end
+println("There are $(length(slr_scenarios)) parameter sets")
+```
+
+## Storm Surge
+
+Here we are modeling a distribution for storm surge by sampling parameteres from the range centered in the distribution from Lab 3. This helps to account for the uncertainty in storm surge. We can call this function to get different distributions for storm surge.
+```{julia}
+function draw_surge_distribution()
+    μ = rand(Normal(5, 1))
+    σ = rand(Exponential(1.5))
+    ξ = rand(Normal(0.1, 0.05))
+    GeneralizedExtremeValue(μ, σ, ξ)
+end
+```
+
+## Discount Rate
+
+The discount rate is important in NPV analysis, but there are both random and not random factors that go into discounting, which are acounted for in the following function.
+```{julia}
+function draw_discount_rate()
+    return rand(Normal(0.04, 0.02))
+end
+```
+
+## Running the Simulation
+
+We are adding the object ModelParams, which contains all fo the parameters of the model that dont change from one simulation to the next.
+```{julia}
+p = ModelParams(
+    house=house,
+    years=2024:2100
+)
 ```
