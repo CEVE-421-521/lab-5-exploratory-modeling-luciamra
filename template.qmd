@@ -65,14 +65,14 @@ using HouseElevation
 
 This creates the House object which contains all of the relevant information four our building, including: depth-damage function, area, cost (USD), elevation relative to gauge, and metadata
 The building I am studying is Fisherman's Wharf at 2200 Harborside Drive Galveston, TX.
-I got the information for the building area from the cvent website for event space. The value of the property results fro searches on Zillow for average building prices in the area. Finally, the depth-damage curve which I chose is a result of location, building type, and what I am looking to analyze for damages. 
+I got the information for the building area from the cvent website for event space. The value of the property results from searches on Zillow for average building prices in the area. Finally, the depth-damage curve which I chose is a result of location, building type, and what I am looking to analyze for damages. 
 ```{julia}
 house = let
     haz_fl_dept = CSV.read("data/haz_fl_dept.csv", DataFrame) # read in the file
     desc = "Cafeteria Restaurant, structure"
     row = @rsubset(haz_fl_dept, :Description == desc)[1, :] # select the row I want
     area = 4004u"ft^2"
-    height_above_gauge = 4u"ft" # height is actually 3.74ft but this function only takes integer values so we will round to 4
+    height_above_gauge = 4*u"ft" # height is actually 3.74ft but this function only takes integer values so we will round to 4
     House(
         row;
         area=area,
@@ -100,9 +100,33 @@ let
 end
 ```
 
+Here we will plot the cost of ekevating our building from 0 to 14 ft using the elevation_cost function.
+```{julia}
+elevation_cost(house, 4u"ft")
+```
+
+```{julia}
+let
+    # elevations from 0 to 14 feet at 0.25ft differences
+    elevations = 0u"ft":0.25u"ft":14u"ft" 
+    # cost of elevating the house by each of these heights
+    costs = [elevation_cost(house, eᵢ) for eᵢ in elevations]
+    scatter(
+        elevations,
+        costs ./ 1_000;
+        xlabel="Elevation",
+        ylabel="Cost (Thousand USD)",
+        label="$(house.description)\n($(house.source))",
+        legend=:bottomright,
+        size=(800, 400),
+        yformatter=:plain, # prevents scientific notation
+    )
+end
+```
+
 ## Sea-level Rise
 
-Here we will model sea-level rise using the approach by Otto et al. (2017) that is calibrated to hisotrical sea-level rise in the Netherlands.
+Here we will model sea-level rise using the approach by Otto et al. (2017) that is calibrated to historical sea-level rise in the Netherlands.
 ```{julia}
 slr_scenarios = let
     df = CSV.read("data/slr_oddo.csv", DataFrame)
@@ -123,9 +147,16 @@ function draw_surge_distribution()
 end
 ```
 
+We want a function that draws samples from the storm surge distribution.
+```{julia}
+function surge_dist_sample()
+    surge_sample = rand(draw_surge_distribution())
+end
+```
+
 ## Discount Rate
 
-The discount rate is important in NPV analysis, but there are both random and not random factors that go into discounting, which are acounted for in the following function.
+The discount rate is important in NPV analysis, but there are both random and not random factors that go into discounting, which are acounted for in the following function. This function already draws a sample from a normal distribution for discount rates.
 ```{julia}
 function draw_discount_rate()
     return rand(Normal(0.04, 0.02))
@@ -134,10 +165,30 @@ end
 
 ## Running the Simulation
 
-We are adding the object ModelParams, which contains all fo the parameters of the model that dont change from one simulation to the next.
+We are adding the object ModelParams, which contains all of the parameters of the model that dont change from one simulation to the next.
+Note: it may be interesting to run this simulation considering different years.
 ```{julia}
 p = ModelParams(
     house=house,
     years=2024:2100
 )
+```
+
+Here we are creating an object that will hold our state of the world (SOW).
+```{julia}
+sow = SOW(
+    rand(slr_scenarios),
+    draw_surge_distribution(),
+    draw_discount_rate()
+)
+```
+
+Here we are defininf out action, a. This action is to raise the building to a fixed elevation.
+```{julia}
+a = Action(3.0u"ft")
+```
+
+This function runs the simulation, taking in the model parameters, SOW, and the action, and returning the net present value of doing the action.
+```{julia}
+res = run_sim(a, sow, p)
 ```
