@@ -198,9 +198,26 @@ res = run_sim(a, sow, p)
 This will be a large ensemble of simulations which samples many SOWs for a range of actions (house elevations). 
 ```{julia}
 #randomize actions and then take a random for the actions
-
-sows = [SOW(rand(slr_scenarios), draw_surge_distribution(), draw_discount_rate()) for _ in 1:10] # for 10 SOWs
+heights = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0] .*u"ft"
+sows = [SOW(rand(slr_scenarios), draw_surge_distribution(), draw_discount_rate()) for _ in 1:100] # for 10 SOWs
 # ask how we create a for loop situation where for each SOW we try out multiple actions
-actions = [Action(3.0u"ft") for _ in 1:10] # these are all the same
+actions = [Action(rand(heights)) for _ in 1:100] # these are all the same
 results = [run_sim(a, s, p) for (a, s) in zip(actions, sows)]
+```
+
+Here we create a dataframe for ouir results.
+```{julia}
+df = DataFrame(
+    npv=results,
+    Δh_ft=[a.Δh_ft for a in actions],
+    slr_a=[s.slr.a for s in sows],
+    slr_b=[s.slr.b for s in sows],
+    slr_c=[s.slr.c for s in sows],
+    slr_tstar=[s.slr.tstar for s in sows],
+    slr_cstar=[s.slr.cstar for s in sows],
+    surge_μ=[s.surge_dist.μ for s in sows],
+    surge_σ=[s.surge_dist.σ for s in sows],
+    surge_ξ=[s.surge_dist.ξ for s in sows],
+    discount_rate=[s.discount_rate for s in sows],
+)
 ```
