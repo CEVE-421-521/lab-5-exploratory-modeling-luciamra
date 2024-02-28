@@ -192,3 +192,13 @@ This function runs the simulation, taking in the model parameters, SOW, and the 
 ```{julia}
 res = run_sim(a, sow, p)
 ```
+
+## Large Ensemble
+
+This will be a large ensemble of simulations which samples many SOWs for a range of actions (house elevations). 
+```{julia}
+sows = [SOW(rand(slr_scenarios), draw_surge_distribution(), draw_discount_rate()) for _ in 1:10] # for 10 SOWs
+# ask how we create a for loop situation where for each SOW we try out multiple actions
+actions = [Action(3.0u"ft") for _ in 1:10] # these are all the same
+results = [run_sim(a, s, p) for (a, s) in zip(actions, sows)]
+```
