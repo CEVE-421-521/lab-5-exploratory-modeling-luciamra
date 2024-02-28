@@ -197,6 +197,8 @@ res = run_sim(a, sow, p)
 
 This will be a large ensemble of simulations which samples many SOWs for a range of actions (house elevations). 
 ```{julia}
+#randomize actions and then take a random for the actions
+
 sows = [SOW(rand(slr_scenarios), draw_surge_distribution(), draw_discount_rate()) for _ in 1:10] # for 10 SOWs
 # ask how we create a for loop situation where for each SOW we try out multiple actions
 actions = [Action(3.0u"ft") for _ in 1:10] # these are all the same
