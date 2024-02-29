@@ -204,7 +204,7 @@ actions = [Action(rand(heights)) for _ in 1:200] # these are all the same
 results = [run_sim(a, s, p) for (a, s) in zip(actions, sows)]
 ```
 
-Here we create a dataframe for ouir results.
+Here we create a dataframe for our results.
 ```{julia}
 df = DataFrame(
     npv=results,
@@ -221,6 +221,8 @@ df = DataFrame(
 )
 ```
 
+It can be helpful to keep some parameters constant and vary only one at a time to wee which has the greatest evvect on the NPV.
+Here we will vary
 ## Analysis
 
 In order to underestand our results we can represent the data through plots.
@@ -236,3 +238,18 @@ scatter(
     yformatter=:plain, # prevents scientific notation
 )
 ```
+
+When do we get the best results?
+The best results seem to be at around the 11-ft area of the graph. In this reigon, the scatter points demonstrate a smaller negative NPV, meaning that in the long run, we are still spending money, but less money than for many of the other cases.
+
+When do you get the worst resutls?
+The worst results appear between 0- and 2-ft. This is the region in which we find the highest lows and the highest highs. This is most likely a result of the cost of elevating the house an elevation which is not enough to make a singificant difference when it comes to flood depth and damage.
+
+What are the most important parameters?
+
+
+If you had unlimited computing power, would you run more simulations? How many?
+If it were possible to have unlimited computing power, I would run trillions of simulations. This is because it would be extrememly to understand and have an exact outcome for every single situation. This would provide homeowners, developers, and policy makers with exact knowledge. This is not realistic of course, so the information we have is a great source of information into what are the more important parameters and on trends and correlations in what we are looking for,
+
+What are the implications of your results for decision-making?
+The implications of these results is that it is clear that elevating ones home results in monetary saving, but that below a certain threshold, it there is a chance that it is actually more expensive than doing nothing at all. This can be a good guide for people in regions of flood risk to understand what elevating ones home can do, but it should not be taken as law. This is because there are considerations that are not factored in, and uncertainty in many places including future economies, climate change, and flood depth among many other things.
