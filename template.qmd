@@ -198,10 +198,9 @@ res = run_sim(a, sow, p)
 This will be a large ensemble of simulations which samples many SOWs for a range of actions (house elevations). 
 ```{julia}
 #randomize actions and then take a random for the actions
-heights = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0] .*u"ft"
-sows = [SOW(rand(slr_scenarios), draw_surge_distribution(), draw_discount_rate()) for _ in 1:100] # for 10 SOWs
-# ask how we create a for loop situation where for each SOW we try out multiple actions
-actions = [Action(rand(heights)) for _ in 1:100] # these are all the same
+heights = [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0, 10.5, 11.0, 11.5, 12.0, 12.5, 13.0] .*u"ft"
+sows = [SOW(rand(slr_scenarios), draw_surge_distribution(), draw_discount_rate()) for _ in 1:200] # for 200 SOWs
+actions = [Action(rand(heights)) for _ in 1:200] # these are all the same
 results = [run_sim(a, s, p) for (a, s) in zip(actions, sows)]
 ```
 
@@ -219,5 +218,21 @@ df = DataFrame(
     surge_σ=[s.surge_dist.σ for s in sows],
     surge_ξ=[s.surge_dist.ξ for s in sows],
     discount_rate=[s.discount_rate for s in sows],
+)
+```
+
+## Analysis
+
+In order to underestand our results we can represent the data through plots.
+```{julia}
+scatter(
+    df.Δh_ft,
+    df.npv ./ 1_000;
+    xlabel="Elevation",
+    ylabel="NPV (Thousand USD)",
+    label="$(house.description)\n($(house.source))",
+    legend=:bottomright,
+    size=(800, 400),
+    yformatter=:plain, # prevents scientific notation
 )
 ```
