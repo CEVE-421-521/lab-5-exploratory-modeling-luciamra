@@ -293,7 +293,7 @@ When do you get the worst resutls?
 The worst results appear between 0- and 2-ft. This is the region in which we find the highest lows and the highest highs. This is most likely a result of the cost of elevating the house an elevation which is not enough to make a singificant difference when it comes to flood depth and damage.
 
 What are the most important parameters?
-Based on the graphs comparing
+Using the graphs comparing the different parameters to the net present value, we can analyze which parameters have a greater effect on NPV. While it is clear that all aprameters can have drastic effects on the NPV, the one which most affects it seems to be the discount rate. This is because for the smallest variations in discount rate, there seems to be the largest differences in NPV. This is important information that can be gained from this sort of analysis because it will inform homewoners, developers and planners that they must be attentive to economic shifts and possibilities, because it is likely to have a large effect on the NPV of their project.
 
 If you had unlimited computing power, would you run more simulations? How many?
 If it were possible to have unlimited computing power, I would run trillions of simulations. This is because it would be extrememly to understand and have an exact outcome for every single situation. This would provide homeowners, developers, and policy makers with exact knowledge. This is not realistic of course, so the information we have is a great source of information into what are the more important parameters and on trends and correlations in what we are looking for,
